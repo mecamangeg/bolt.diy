@@ -18,7 +18,7 @@ pm2 start .codespace-automation/scripts/branch-watcher.js \
 
 # Start the dev server with auto-restart
 echo "🌐 Starting dev server with PM2 auto-healing..."
-pm2 start npm \
+pm2 start pnpm \
   --name "dev-server" \
   --watch false \
   -- run dev \

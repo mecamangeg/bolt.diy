@@ -16,7 +16,7 @@ This folder contains the automation system for Claude.ai → GitHub Codespaces p
 ## 🔗 Symlinked Scripts
 
 The `scripts/` folder is a symlink to the original source:
-`/home/user/bolt.diy/claude-preview-automation/scripts`
+`/workspaces/bolt.diy/claude-preview-automation/scripts`
 
 This means:
 - Updates to the source automatically apply here
@@ -29,7 +29,7 @@ See project root for:
 - `CLAUDE_PREVIEW_SETUP.md` - Quick start guide
 - `QUICK_REFERENCE.md` - Daily usage cheat sheet
 
-Full documentation: `/home/user/bolt.diy/claude-preview-automation/docs/README.md`
+Full documentation: `/workspaces/bolt.diy/claude-preview-automation/docs/README.md`
 
 ## 🔄 Updating
 
@@ -37,7 +37,7 @@ To update the automation system:
 
 ```bash
 # If using git submodule (recommended)
-cd /home/user/bolt.diy/claude-preview-automation
+cd /workspaces/bolt.diy/claude-preview-automation
 git pull
 
 # If copied directly
@@ -64,5 +64,5 @@ claude-preview logs
 
 ---
 
-Installed from: `/home/user/bolt.diy/claude-preview-automation`
-Installation date: Fri Nov 14 06:39:40 UTC 2025
+Installed from: `/workspaces/bolt.diy/claude-preview-automation`
+Installation date: Fri Nov 14 06:53:38 UTC 2025
