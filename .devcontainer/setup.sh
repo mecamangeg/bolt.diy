@@ -3,13 +3,35 @@ set -e
 
 echo "🚀 Setting up Claude Preview Codespace..."
 
+# Detect package manager
+echo "🔍 Detecting package manager..."
+if [ -f "pnpm-lock.yaml" ]; then
+  PKG_MANAGER="pnpm"
+  echo "✅ Detected pnpm"
+elif [ -f "yarn.lock" ]; then
+  PKG_MANAGER="yarn"
+  echo "✅ Detected yarn"
+elif [ -f "package-lock.json" ]; then
+  PKG_MANAGER="npm"
+  echo "✅ Detected npm"
+else
+  PKG_MANAGER="npm"
+  echo "⚠️  No lock file found, defaulting to npm"
+fi
+
 # Install PM2 globally for process management
 echo "📦 Installing PM2 for auto-healing dev server..."
 npm install -g pm2
 
+# Install pnpm globally if needed
+if [ "$PKG_MANAGER" = "pnpm" ]; then
+  echo "📦 Installing pnpm globally..."
+  npm install -g pnpm
+fi
+
 # Install project dependencies
-echo "📦 Installing project dependencies..."
-npm install
+echo "📦 Installing project dependencies with $PKG_MANAGER..."
+$PKG_MANAGER install
 
 # Create directories for automation scripts
 mkdir -p .codespace-automation/{logs,scripts,config}

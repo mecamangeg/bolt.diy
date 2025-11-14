@@ -36,7 +36,8 @@
   },
 
   // Lifecycle scripts
-  "postCreateCommand": "bash .devcontainer/setup.sh",
+  // Optimized: Install global tools first, then project dependencies
+  "postCreateCommand": "npm i -g pm2 pnpm && bash .devcontainer/setup.sh",
   "postStartCommand": "bash .devcontainer/start-services.sh",
 
   // VSCode customizations

@@ -13,11 +13,14 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, exec } = require('child_process');
+const net = require('net');
 
 const PORT = 8080;
 const STATE_FILE = path.join(__dirname, '../config/watcher-state.json');
 const NOTIFICATION_FILE = path.join(__dirname, '../config/preview-notification.json');
+const DEV_PORT_FILE = path.join(__dirname, '../config/dev-port.txt');
+const HEALTH_CHECK_INTERVAL = 30000; // 30 seconds
 
 // Get current state
 function getState() {
@@ -94,6 +97,73 @@ function getProcessStatus() {
   }
 }
 
+// Health monitoring: Check if a port is accessible
+function checkPort(port) {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    const timeout = 2000; // 2 seconds
+
+    socket.setTimeout(timeout);
+    socket.on('connect', () => {
+      socket.destroy();
+      resolve(true);
+    });
+    socket.on('timeout', () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.on('error', () => {
+      resolve(false);
+    });
+
+    socket.connect(port, '127.0.0.1');
+  });
+}
+
+// Get dev server port
+function getDevPort() {
+  try {
+    if (fs.existsSync(DEV_PORT_FILE)) {
+      return parseInt(fs.readFileSync(DEV_PORT_FILE, 'utf8').trim(), 10);
+    }
+  } catch (error) {
+    console.error('Failed to read dev port:', error.message);
+  }
+  return 5173; // Default to Vite port
+}
+
+// Health check and auto-recovery
+async function performHealthCheck() {
+  const devPort = getDevPort();
+  const processes = getProcessStatus();
+  const devServer = processes.find(p => p.name === 'dev-server');
+
+  // Check if dev server is running in PM2 but port is not accessible
+  if (devServer && devServer.status === 'online') {
+    const portAccessible = await checkPort(devPort);
+
+    if (!portAccessible) {
+      console.log(`⚠️  Dev server shows online but port ${devPort} is not accessible. Auto-recovering...`);
+      exec('pm2 restart dev-server', (error) => {
+        if (error) {
+          console.error('Failed to restart dev-server:', error.message);
+        } else {
+          console.log('✅ Dev server restarted successfully');
+        }
+      });
+    }
+  } else if (!devServer || devServer.status !== 'online') {
+    console.log('⚠️  Dev server is not running. Attempting to start...');
+    exec('pm2 start dev-server', (error) => {
+      if (error) {
+        console.error('Failed to start dev-server:', error.message);
+      } else {
+        console.log('✅ Dev server started successfully');
+      }
+    });
+  }
+}
+
 // HTML template
 function generateHTML(data) {
   const gitInfo = data.gitInfo || {};
@@ -101,9 +171,10 @@ function generateHTML(data) {
   const state = data.state || {};
   const processes = data.processes || [];
   const branches = data.branches || [];
+  const devPort = getDevPort();
   const previewUrl = process.env.CODESPACE_NAME
-    ? `https://${process.env.CODESPACE_NAME}-3000.app.github.dev`
-    : 'http://localhost:3000';
+    ? `https://${process.env.CODESPACE_NAME}-${devPort}.app.github.dev`
+    : `http://localhost:${devPort}`;
 
   return `
 <!DOCTYPE html>
@@ -390,4 +461,11 @@ server.listen(PORT, () => {
   if (process.env.CODESPACE_NAME) {
     console.log(`🌐 Public URL: https://${process.env.CODESPACE_NAME}-${PORT}.app.github.dev`);
   }
+
+  // Start health monitoring
+  console.log(`🏥 Health monitoring enabled (checking every ${HEALTH_CHECK_INTERVAL / 1000}s)`);
+  setInterval(performHealthCheck, HEALTH_CHECK_INTERVAL);
+
+  // Run initial health check after 10 seconds
+  setTimeout(performHealthCheck, 10000);
 });

@@ -98,8 +98,15 @@ show_monitor() {
 }
 
 open_preview() {
+    # Detect port from config file or default to 5173
+    if [ -f ".codespace-automation/config/dev-port.txt" ]; then
+        DEV_PORT=$(cat .codespace-automation/config/dev-port.txt)
+    else
+        DEV_PORT="5173"
+    fi
+
     if [ -n "$CODESPACE_NAME" ]; then
-        PREVIEW_URL="https://$CODESPACE_NAME-3000.app.github.dev"
+        PREVIEW_URL="https://$CODESPACE_NAME-$DEV_PORT.app.github.dev"
         echo -e "${GREEN}🌐 Opening preview:${NC} $PREVIEW_URL"
         echo ""
         echo -e "${YELLOW}In Codespaces, open this URL in your browser:${NC}"
@@ -108,7 +115,7 @@ open_preview() {
         echo -e "${YELLOW}Or use Simple Browser in VSCode:${NC}"
         echo -e "Cmd/Ctrl+Shift+P → 'Simple Browser: Show' → Paste URL"
     else
-        echo -e "${GREEN}🌐 Preview URL:${NC} http://localhost:3000"
+        echo -e "${GREEN}🌐 Preview URL:${NC} http://localhost:$DEV_PORT"
     fi
 }
 
@@ -185,9 +192,15 @@ health_check() {
         echo -e "${RED}✗${NC}"
     fi
 
-    # Check port availability
-    echo -n "Port 3000 (dev server): "
-    if lsof -i :3000 &> /dev/null; then
+    # Check port availability (dynamic port detection)
+    if [ -f ".codespace-automation/config/dev-port.txt" ]; then
+        DEV_PORT=$(cat .codespace-automation/config/dev-port.txt)
+    else
+        DEV_PORT="5173"
+    fi
+
+    echo -n "Port $DEV_PORT (dev server): "
+    if lsof -i :$DEV_PORT &> /dev/null; then
         echo -e "${GREEN}✓ In use${NC}"
     else
         echo -e "${YELLOW}⚠ Not in use${NC}"
