@@ -1,0 +1,80 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Open Preview in Simple Browser",
+      "type": "shell",
+      "command": "echo",
+      "args": [
+        "Opening preview at https://${env:CODESPACE_NAME}-3000.app.github.dev"
+      ],
+      "presentation": {
+        "reveal": "never",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Open Dashboard",
+      "type": "shell",
+      "command": "code",
+      "args": [
+        "--open-url",
+        "https://${env:CODESPACE_NAME}-8080.app.github.dev"
+      ],
+      "presentation": {
+        "reveal": "never"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start All Services",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        ".devcontainer/start-services.sh"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "View PM2 Logs",
+      "type": "shell",
+      "command": "pm2",
+      "args": ["logs"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Restart Dev Server",
+      "type": "shell",
+      "command": "pm2",
+      "args": ["restart", "dev-server"],
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Watch for Claude Commits (manual)",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        ".codespace-automation/scripts/branch-watcher.js"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

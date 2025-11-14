@@ -1,0 +1,41 @@
+{
+  // Simple Browser settings
+  "simpleBrowser.autoRefresh": true,
+  "simpleBrowser.focusLockIndicator.enabled": true,
+
+  // Auto-open preview on Codespace start
+  "workbench.action.tasks.runTask": "Open Preview in Simple Browser",
+
+  // File watcher settings
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.codespace-automation/logs/**": true
+  },
+
+  // Git settings for faster fetching
+  "git.autofetch": true,
+  "git.fetchOnPull": true,
+  "git.autorefresh": true,
+  "git.refreshPeriod": 3000,
+
+  // Terminal settings
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.scrollback": 10000,
+
+  // Editor settings for faster feedback
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // Disable telemetry for performance
+  "telemetry.telemetryLevel": "off",
+
+  // Custom status bar items (requires extension)
+  "statusBar.show": true,
+
+  // Recommended extensions
+  "extensions.ignoreRecommendations": false
+}
