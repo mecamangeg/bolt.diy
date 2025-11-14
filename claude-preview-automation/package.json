@@ -1,0 +1,21 @@
+{
+  "name": "codespace-automation",
+  "version": "1.0.0",
+  "description": "Automated preview system for Claude.ai commits in GitHub Codespaces",
+  "main": "scripts/branch-watcher.js",
+  "scripts": {
+    "start": "pm2 start scripts/branch-watcher.js --name branch-watcher",
+    "stop": "pm2 stop branch-watcher",
+    "restart": "pm2 restart branch-watcher",
+    "logs": "pm2 logs branch-watcher",
+    "dashboard": "node scripts/dashboard-server.js",
+    "status": "pm2 list",
+    "monitor": "pm2 monit"
+  },
+  "keywords": ["claude", "codespaces", "automation", "preview"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "chokidar": "^3.5.3"
+  }
+}

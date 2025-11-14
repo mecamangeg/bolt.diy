@@ -1,0 +1,291 @@
+#!/bin/bash
+
+# Claude Preview Helper Script
+# Quick commands for managing the preview automation system
+
+set -e
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+# Functions
+show_help() {
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}Claude Preview Helper${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${YELLOW}Usage:${NC} claude-preview <command>"
+    echo ""
+    echo -e "${YELLOW}Commands:${NC}"
+    echo ""
+    echo -e "  ${GREEN}start${NC}      Start all services (watcher, dev server, dashboard)"
+    echo -e "  ${GREEN}stop${NC}       Stop all services"
+    echo -e "  ${GREEN}restart${NC}    Restart all services"
+    echo -e "  ${GREEN}status${NC}     Show status of all services"
+    echo -e "  ${GREEN}logs${NC}       View logs (all services)"
+    echo -e "  ${GREEN}logs-watch${NC} View logs for watcher only"
+    echo -e "  ${GREEN}logs-dev${NC}   View logs for dev server only"
+    echo -e "  ${GREEN}monitor${NC}    Open PM2 monitoring dashboard"
+    echo -e "  ${GREEN}preview${NC}    Open preview URL in browser"
+    echo -e "  ${GREEN}dashboard${NC}  Open monitoring dashboard in browser"
+    echo -e "  ${GREEN}branches${NC}   List recent Claude branches"
+    echo -e "  ${GREEN}current${NC}    Show current branch and commit"
+    echo -e "  ${GREEN}health${NC}     Run health check on all services"
+    echo -e "  ${GREEN}reset${NC}      Reset state and restart from scratch"
+    echo -e "  ${GREEN}help${NC}       Show this help message"
+    echo ""
+    echo -e "${YELLOW}Examples:${NC}"
+    echo ""
+    echo -e "  claude-preview start          # Start everything"
+    echo -e "  claude-preview logs           # View all logs"
+    echo -e "  claude-preview preview        # Open preview"
+    echo ""
+}
+
+start_services() {
+    echo -e "${BLUE}🚀 Starting Claude Preview services...${NC}"
+    bash .devcontainer/start-services.sh
+    echo -e "${GREEN}✅ Services started${NC}"
+}
+
+stop_services() {
+    echo -e "${YELLOW}⏹️  Stopping services...${NC}"
+    pm2 stop all
+    echo -e "${GREEN}✅ Services stopped${NC}"
+}
+
+restart_services() {
+    echo -e "${YELLOW}🔄 Restarting services...${NC}"
+    pm2 restart all
+    echo -e "${GREEN}✅ Services restarted${NC}"
+}
+
+show_status() {
+    echo -e "${BLUE}📊 Service Status:${NC}"
+    echo ""
+    pm2 list
+    echo ""
+    echo -e "${BLUE}📍 Current Branch:${NC}"
+    git rev-parse --abbrev-ref HEAD
+    echo ""
+    echo -e "${BLUE}💾 Last Commit:${NC}"
+    git log -1 --format="%h - %s (%an, %ar)"
+}
+
+show_logs() {
+    echo -e "${BLUE}📜 Viewing logs (Ctrl+C to exit)...${NC}"
+    pm2 logs
+}
+
+show_logs_watcher() {
+    echo -e "${BLUE}👀 Viewing watcher logs (Ctrl+C to exit)...${NC}"
+    pm2 logs branch-watcher
+}
+
+show_logs_dev() {
+    echo -e "${BLUE}🌐 Viewing dev server logs (Ctrl+C to exit)...${NC}"
+    pm2 logs dev-server
+}
+
+show_monitor() {
+    echo -e "${BLUE}📊 Opening PM2 monitor...${NC}"
+    pm2 monit
+}
+
+open_preview() {
+    if [ -n "$CODESPACE_NAME" ]; then
+        PREVIEW_URL="https://$CODESPACE_NAME-3000.app.github.dev"
+        echo -e "${GREEN}🌐 Opening preview:${NC} $PREVIEW_URL"
+        echo ""
+        echo -e "${YELLOW}In Codespaces, open this URL in your browser:${NC}"
+        echo -e "$PREVIEW_URL"
+        echo ""
+        echo -e "${YELLOW}Or use Simple Browser in VSCode:${NC}"
+        echo -e "Cmd/Ctrl+Shift+P → 'Simple Browser: Show' → Paste URL"
+    else
+        echo -e "${GREEN}🌐 Preview URL:${NC} http://localhost:3000"
+    fi
+}
+
+open_dashboard() {
+    if [ -n "$CODESPACE_NAME" ]; then
+        DASHBOARD_URL="https://$CODESPACE_NAME-8080.app.github.dev"
+        echo -e "${GREEN}📊 Opening dashboard:${NC} $DASHBOARD_URL"
+        echo ""
+        echo -e "${YELLOW}In Codespaces, open this URL in your browser:${NC}"
+        echo -e "$DASHBOARD_URL"
+    else
+        echo -e "${GREEN}📊 Dashboard URL:${NC} http://localhost:8080"
+    fi
+}
+
+list_branches() {
+    echo -e "${BLUE}🌿 Recent Claude branches:${NC}"
+    echo ""
+    git fetch origin --quiet 2>/dev/null || true
+    git branch -r | grep 'claude/' | sed 's/origin\///' | head -10
+    echo ""
+}
+
+show_current() {
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}Current State${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${YELLOW}Branch:${NC} $(git rev-parse --abbrev-ref HEAD)"
+    echo -e "${YELLOW}Commit:${NC} $(git rev-parse --short HEAD)"
+    echo -e "${YELLOW}Message:${NC} $(git log -1 --format=%s)"
+    echo -e "${YELLOW}Author:${NC} $(git log -1 --format='%an <%ae>')"
+    echo -e "${YELLOW}Date:${NC} $(git log -1 --format=%ar)"
+    echo ""
+
+    if [ -f ".codespace-automation/config/watcher-state.json" ]; then
+        echo -e "${YELLOW}Watcher State:${NC}"
+        cat .codespace-automation/config/watcher-state.json | grep -E '(lastBranch|lastCommit|lastCheck)' | sed 's/^/  /'
+        echo ""
+    fi
+}
+
+health_check() {
+    echo -e "${BLUE}🏥 Running health check...${NC}"
+    echo ""
+
+    # Check PM2
+    echo -n "PM2 installed: "
+    if command -v pm2 &> /dev/null; then
+        echo -e "${GREEN}✓${NC}"
+    else
+        echo -e "${RED}✗${NC}"
+    fi
+
+    # Check if services are running
+    echo -n "Branch watcher running: "
+    if pm2 list | grep -q "branch-watcher.*online"; then
+        echo -e "${GREEN}✓${NC}"
+    else
+        echo -e "${RED}✗${NC}"
+    fi
+
+    echo -n "Dev server running: "
+    if pm2 list | grep -q "dev-server.*online"; then
+        echo -e "${GREEN}✓${NC}"
+    else
+        echo -e "${RED}✗${NC}"
+    fi
+
+    echo -n "Dashboard running: "
+    if pm2 list | grep -q "preview-dashboard.*online"; then
+        echo -e "${GREEN}✓${NC}"
+    else
+        echo -e "${RED}✗${NC}"
+    fi
+
+    # Check port availability
+    echo -n "Port 3000 (dev server): "
+    if lsof -i :3000 &> /dev/null; then
+        echo -e "${GREEN}✓ In use${NC}"
+    else
+        echo -e "${YELLOW}⚠ Not in use${NC}"
+    fi
+
+    echo -n "Port 8080 (dashboard): "
+    if lsof -i :8080 &> /dev/null; then
+        echo -e "${GREEN}✓ In use${NC}"
+    else
+        echo -e "${YELLOW}⚠ Not in use${NC}"
+    fi
+
+    # Check git connectivity
+    echo -n "Git remote access: "
+    if git fetch origin --dry-run &> /dev/null; then
+        echo -e "${GREEN}✓${NC}"
+    else
+        echo -e "${RED}✗${NC}"
+    fi
+
+    echo ""
+}
+
+reset_state() {
+    echo -e "${RED}⚠️  This will reset all state and restart services${NC}"
+    read -p "Continue? (y/N) " -n 1 -r
+    echo ""
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}Stopping services...${NC}"
+        pm2 stop all
+
+        echo -e "${YELLOW}Resetting state...${NC}"
+        rm -f .codespace-automation/config/watcher-state.json
+        rm -f .codespace-automation/config/preview-notification.json
+
+        echo -e "${YELLOW}Clearing logs...${NC}"
+        pm2 flush
+
+        echo -e "${YELLOW}Restarting services...${NC}"
+        bash .devcontainer/start-services.sh
+
+        echo -e "${GREEN}✅ Reset complete${NC}"
+    else
+        echo -e "${YELLOW}Cancelled${NC}"
+    fi
+}
+
+# Main command handler
+case "${1:-help}" in
+    start)
+        start_services
+        ;;
+    stop)
+        stop_services
+        ;;
+    restart)
+        restart_services
+        ;;
+    status)
+        show_status
+        ;;
+    logs)
+        show_logs
+        ;;
+    logs-watch|logs-watcher)
+        show_logs_watcher
+        ;;
+    logs-dev)
+        show_logs_dev
+        ;;
+    monitor|mon)
+        show_monitor
+        ;;
+    preview)
+        open_preview
+        ;;
+    dashboard|dash)
+        open_dashboard
+        ;;
+    branches|br)
+        list_branches
+        ;;
+    current|curr)
+        show_current
+        ;;
+    health)
+        health_check
+        ;;
+    reset)
+        reset_state
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        echo -e "${RED}Unknown command: $1${NC}"
+        echo ""
+        show_help
+        exit 1
+        ;;
+esac

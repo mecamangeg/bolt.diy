@@ -1,0 +1,25 @@
+# Auto-generated logs
+logs/*.log
+
+# Auto-generated config
+config/*.json
+
+# Node modules (if npm install is run here)
+node_modules/
+
+# PM2 files
+.pm2/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.backup
+*.bak
