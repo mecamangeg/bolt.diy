@@ -1,0 +1,102 @@
+{
+  "name": "Claude Preview Codespace",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+
+  // Features
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // Port forwarding for dev server
+  "forwardPorts": [3000, 5173, 8080, 4000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js Preview",
+      "onAutoForward": "openPreview",
+      "protocol": "https"
+    },
+    "5173": {
+      "label": "Vite Preview",
+      "onAutoForward": "openPreview",
+      "protocol": "https"
+    },
+    "8080": {
+      "label": "Dashboard",
+      "onAutoForward": "silent",
+      "protocol": "https"
+    },
+    "4000": {
+      "label": "Webhook Listener",
+      "onAutoForward": "silent",
+      "protocol": "https"
+    }
+  },
+
+  // Lifecycle scripts
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "bash .devcontainer/start-services.sh",
+
+  // VSCode customizations
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "GitHub.vscode-pull-request-github",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        // Auto-save for faster iteration
+        "files.autoSave": "afterDelay",
+        "files.autoSaveDelay": 1000,
+
+        // Git settings
+        "git.autofetch": true,
+        "git.fetchOnPull": true,
+        "git.pullBeforeCheckout": true,
+
+        // Terminal settings
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/bin/bash",
+            "args": ["-l"]
+          }
+        },
+
+        // Simple Browser auto-refresh
+        "simpleBrowser.autoRefresh": true,
+
+        // Disable telemetry for performance
+        "telemetry.telemetryLevel": "off"
+      }
+    }
+  },
+
+  // Keep alive settings
+  "remoteEnv": {
+    "CODESPACE_KEEP_ALIVE": "true",
+    "NODE_ENV": "development",
+    "NEXT_TELEMETRY_DISABLED": "1"
+  },
+
+  // Resource settings
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
+
+  // Run as non-root for npm
+  "remoteUser": "node",
+
+  // Mount docker socket for containerized apps
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ]
+}

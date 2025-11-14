@@ -1,0 +1,11 @@
+# Logs
+logs/*.log
+
+# State files
+config/*.json
+
+# Node modules
+node_modules/
+
+# PM2 files
+.pm2/

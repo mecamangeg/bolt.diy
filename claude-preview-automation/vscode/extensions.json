@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-vscode.vscode-typescript-next",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "GitHub.vscode-pull-request-github",
+    "eamodio.gitlens",
+    "ms-vscode.live-server"
+  ],
+  "unwantedRecommendations": []
+}
