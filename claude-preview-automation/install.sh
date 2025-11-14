@@ -15,7 +15,16 @@ NC='\033[0m' # No Color
 
 # Get the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PROJECT_ROOT="${1:-$(pwd)}"
+
+# Check for --yes flag
+AUTO_YES=false
+if [[ "$1" == "--yes" ]] || [[ "$1" == "-y" ]] || [[ "$2" == "--yes" ]] || [[ "$2" == "-y" ]]; then
+  AUTO_YES=true
+  PROJECT_ROOT="${1:-$(pwd)}"
+  [[ "$1" == "--yes" || "$1" == "-y" ]] && PROJECT_ROOT="$(pwd)"
+else
+  PROJECT_ROOT="${1:-$(pwd)}"
+fi
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${CYAN}Claude Preview Automation - Installer${NC}"
@@ -25,12 +34,16 @@ echo -e "${YELLOW}Installation directory:${NC} $PROJECT_ROOT"
 echo -e "${YELLOW}Source directory:${NC} $SCRIPT_DIR"
 echo ""
 
-# Confirm installation
-read -p "Install Claude Preview Automation here? (y/N) " -n 1 -r
-echo ""
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}Installation cancelled.${NC}"
-    exit 0
+# Confirm installation (skip if --yes flag)
+if [ "$AUTO_YES" = false ]; then
+  read -p "Install Claude Preview Automation here? (y/N) " -n 1 -r
+  echo ""
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      echo -e "${YELLOW}Installation cancelled.${NC}"
+      exit 0
+  fi
+else
+  echo -e "${GREEN}Auto-install mode (--yes flag detected)${NC}"
 fi
 
 echo ""
