@@ -1,0 +1,42 @@
+{
+  "name": "bolt-diy-observability-system",
+  "version": "1.0.0",
+  "description": "Production-grade observability system extracted from bolt.diy - includes logging, monitoring, health checks, and error tracking",
+  "keywords": [
+    "observability",
+    "logging",
+    "monitoring",
+    "error-tracking",
+    "debugging",
+    "performance",
+    "health-check",
+    "bolt.diy"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stackblitz/bolt.diy"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "nanostores": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "source-files/**/*",
+    "examples/**/*",
+    "README.md",
+    "AI-INSTRUCTIONS.md",
+    "IMPLEMENTATION-GUIDE.md",
+    "MIGRATION-GUIDE.md"
+  ]
+}
